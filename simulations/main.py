@@ -12,7 +12,9 @@ from trees.bst import BinarySearchTree
 from trees.splay import SplayTree
 from trees.rbt import RedBlackTree
 
+# ─────────────────────────────────────────────
 # Helpers
+# ─────────────────────────────────────────────
 
 def generateProcesses(n: int, ordered: bool = False) -> List[Process]:
     """
@@ -179,6 +181,76 @@ def runScenarioB() -> None:
     return bst_steps, splay_steps, rbt_steps
 
 
+# ─────────────────────────────────────────────
+# Scenario C — Frequent I/O (Same Process 50 times)
+# ─────────────────────────────────────────────
+
+def runScenarioC() -> None:
+    print("\n" + "=" * 60)
+    print("ESCENARIO C — Proceso Frecuente de I/O (50 búsquedas del mismo proceso)")
+    print("=" * 60)
+
+    N = 1000
+    REPEATS = 50
+    processes = generateProcesses(N, ordered=False)
+
+    # Elegimos un proceso al azar para buscar repetidamente
+    target = random.choice(processes)
+    target_vr = target.vruntime
+
+    splay = buildTree(SplayTree, processes)
+    rbt   = buildTree(RedBlackTree, processes)
+
+    splay_steps_list: List[int] = []
+    rbt_steps_list: List[int] = []
+
+    for _ in range(REPEATS):
+        _, s = splay.search(target_vr)
+        splay_steps_list.append(s)
+
+    for _ in range(REPEATS):
+        _, r = rbt.search(target_vr)
+        rbt_steps_list.append(r)
+
+    avg_splay = sum(splay_steps_list) / REPEATS
+    avg_rbt   = sum(rbt_steps_list)   / REPEATS
+
+    print(f"  Proceso objetivo: PID={target.pid}, vruntime={target_vr:.2f}")
+    print(f"  Splay — 1ª búsqueda: {splay_steps_list[0]} pasos | "
+          f"resto: {splay_steps_list[1]} pasos | promedio: {avg_splay:.2f}")
+    print(f"  RBT   — promedio constante: {avg_rbt:.2f} pasos")
+
+    # Gráfica de línea: pasos por iteración
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(range(1, REPEATS + 1), splay_steps_list, "o-",
+            color="#DD8452", label="Splay Tree", linewidth=2)
+    ax.plot(range(1, REPEATS + 1), rbt_steps_list, "s-",
+            color="#55A868", label="Red-Black Tree", linewidth=2)
+    ax.set_title("Escenario C — Pasos por búsqueda repetida del mismo proceso",
+                 fontsize=12, fontweight="bold")
+    ax.set_xlabel("Número de búsqueda")
+    ax.set_ylabel("Pasos")
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("output/scenario_c_io_process.png", dpi=150)
+    plt.close()
+    print("  → Gráfica guardada: output/scenario_c_io_process.png")
+
+    # Gráfica de barras comparativa (promedio)
+    saveBarChart(
+        title="Escenario C — Promedio de pasos (50 búsquedas del mismo proceso)",
+        xlabel="Estructura de datos",
+        ylabel="Promedio de pasos",
+        labels=["Splay Tree", "Red-Black Tree"],
+        values=[avg_splay, avg_rbt],
+        colors=["#DD8452", "#55A868"],
+        filename="output/scenario_c_avg_steps.png",
+        extra_info=f"PID={target.pid} | vruntime={target_vr:.2f} | {REPEATS} búsquedas"
+    )
+
+    return avg_splay, avg_rbt
+
 
 # ─────────────────────────────────────────────
 # Main
@@ -195,6 +267,7 @@ def main() -> None:
 
     avg_bst_a, avg_splay_a, avg_rbt_a = runScenarioA()
     bst_b, splay_b, rbt_b             = runScenarioB()
+    avg_splay_c, avg_rbt_c            = runScenarioC()
 
     # ── Resumen final ──────────────────────────────────────────────
     print("\n" + "=" * 60)
@@ -206,7 +279,8 @@ def main() -> None:
           f"{avg_bst_a:>10.2f} {avg_splay_a:>10.2f} {avg_rbt_a:>10.2f}")
     print(f"{'B — peor caso (buscar proceso 1000)':<35} "
           f"{bst_b:>10} {splay_b:>10} {rbt_b:>10}")
-    
+    print(f"{'C — I/O frecuente (promedio 50 búsq.)':<35} "
+          f"{'N/A':>10} {avg_splay_c:>10.2f} {avg_rbt_c:>10.2f}")
 
     print("\nTodas las gráficas guardadas en la carpeta output/")
 
