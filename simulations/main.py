@@ -139,7 +139,50 @@ def runScenarioA() -> None:
     return avg_bst, avg_splay, avg_rbt
 
 
+# ─────────────────────────────────────────────
+# Scenario B — Sequential Insertion (Worst Case)
+# ─────────────────────────────────────────────
+
+def runScenarioB() -> None:
+    print("\n" + "=" * 60)
+    print("ESCENARIO B — Llegada Secuencial / Peor Caso")
+    print("=" * 60)
+
+    N = 1000
+    processes = generateProcesses(N, ordered=True)
+    target_vr = float(N)  # buscamos el proceso 1000
+
+    bst   = buildTree(BinarySearchTree, processes)
+    splay = buildTree(SplayTree, processes)
+    rbt   = buildTree(RedBlackTree, processes)
+
+    _, bst_steps   = bst.search(target_vr)
+    _, splay_steps = splay.search(target_vr)
+    _, rbt_steps   = rbt.search(target_vr)
+
+    print(f"  Búsqueda del proceso {N} (vruntime={target_vr}):")
+    print(f"  BST:           {bst_steps} pasos  ← degenerado a lista enlazada (O(n))")
+    print(f"  Splay Tree:    {splay_steps} pasos")
+    print(f"  Red-Black:     {rbt_steps} pasos")
+
+    saveBarChart(
+        title=f"Escenario B — Pasos para encontrar proceso {N} (entrada ordenada)",
+        xlabel="Estructura de datos",
+        ylabel="Pasos",
+        labels=["BST", "Splay Tree", "Red-Black Tree"],
+        values=[bst_steps, splay_steps, rbt_steps],
+        colors=["#4C72B0", "#DD8452", "#55A868"],
+        filename="output/scenario_b_worst_case.png",
+        extra_info=f"n={N} procesos insertados en orden ascendente | buscamos vruntime={N}"
+    )
+
+    return bst_steps, splay_steps, rbt_steps
+
+
+
+# ─────────────────────────────────────────────
 # Main
+# ─────────────────────────────────────────────
 
 def main() -> None:
     random.seed(42)  # Reproducibilidad
@@ -151,8 +194,9 @@ def main() -> None:
     print("╚══════════════════════════════════════════════════════════╝")
 
     avg_bst_a, avg_splay_a, avg_rbt_a = runScenarioA()
-    
+    bst_b, splay_b, rbt_b             = runScenarioB()
 
+    # ── Resumen final ──────────────────────────────────────────────
     print("\n" + "=" * 60)
     print("RESUMEN FINAL")
     print("=" * 60)
@@ -160,6 +204,9 @@ def main() -> None:
     print("-" * 65)
     print(f"{'A — promedio (100 búsquedas aleatorias)':<35} "
           f"{avg_bst_a:>10.2f} {avg_splay_a:>10.2f} {avg_rbt_a:>10.2f}")
+    print(f"{'B — peor caso (buscar proceso 1000)':<35} "
+          f"{bst_b:>10} {splay_b:>10} {rbt_b:>10}")
+    
 
     print("\nTodas las gráficas guardadas en la carpeta output/")
 
