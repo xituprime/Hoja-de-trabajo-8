@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from .abstract_tree import AbstractTree
 from .node import Node
 from .process import Process
@@ -39,29 +37,19 @@ class SplayTree(AbstractTree):
         # Después de insertar, hacemos splay del nuevo nodo
         self.splay(new_node)
 
-    def search(self, vruntime: float) -> Tuple[Node | None, int]:
-        """
-        Busca el nodo. Si se encuentra, lo mueve a la raíz con splay.
-        Retorna (nodo_encontrado, pasos).
-        """
+    def search(self, vruntime: float) -> tuple[Node | None, int]:
+        # Misma lógica que BST; sin splay (solo medición de pasos).
         steps = 0
         current = self.root
-        last_visited = None
 
         while current is not None:
-            last_visited = current
-            if vruntime == current.process.vruntime:
-                self.splay(current)
-                return current, steps
             steps += 1
+            if vruntime == current.process.vruntime:
+                return current, steps
             if vruntime < current.process.vruntime:
                 current = current.left
             else:
                 current = current.right
-
-        # Aunque no se encontró, hacemos splay del último nodo visitado
-        if last_visited is not None:
-            self.splay(last_visited)
 
         return None, steps
 

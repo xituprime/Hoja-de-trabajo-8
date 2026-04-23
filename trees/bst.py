@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from .abstract_tree import AbstractTree
 from .node import Node
 from .process import Process
@@ -33,19 +31,15 @@ class BinarySearchTree(AbstractTree):
                     return
                 current = current.right
 
-    def search(self, vruntime: float) -> Tuple[Node | None, int]:
-        """
-        Busca el nodo con el vruntime dado.
-        Retorna (nodo_encontrado, cantidad_de_pasos).
-        Cada vez que bajamos al hijo izquierdo o derecho, se suma 1 al contador.
-        """
+    def search(self, vruntime: float) -> tuple[Node | None, int]:
+        # Un paso = una comparación en un nodo (incluye la que encuentra el valor).
         steps = 0
         current = self.root
 
         while current is not None:
+            steps += 1
             if vruntime == current.process.vruntime:
                 return current, steps
-            steps += 1
             if vruntime < current.process.vruntime:
                 current = current.left
             else:
